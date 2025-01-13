@@ -6,6 +6,7 @@ import com.gamingtec.camel.wallet.dto.BalanceRequest;
 import com.gamingtec.camel.wallet.dto.BalanceResponse;
 import java.math.BigDecimal;
 import java.util.UUID;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,9 @@ public class WalletService extends RouteBuilder {
         .setHeader(CORRELATION_ID, () -> UUID.randomUUID().toString())
         .marshal().json()
         .to("kafka:balance-request?brokers=localhost:9092")
-        .pollEnrich("direct:balance-response", 1000);
+        .pollEnrich("direct:balance-response", 1000)
+        .removeHeaders("*", "Content-Type")
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(200));;
 
   }
 }
